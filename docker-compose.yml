@@ -1,0 +1,36 @@
+version: '3'
+
+services:
+
+  gazin_db:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: "123mudar"
+      MYSQL_DATABASE: "db"
+    container_name: gazin_db  
+    ports:
+      - "3306:3306"
+    #restart: always
+    networks:
+      - mysql-compose-network
+      
+  gazin_api:
+    image: maven:3-jdk-8-slim
+    volumes:
+      - "./:/api_rest_gazin"
+    working_dir: "/api_rest_gazin"
+    ports:
+      - 8080:8080
+    #restart: always
+    command: bash -c "mvn clean && mvn install eclipse:eclipse && mvn spring-boot:run"
+    container_name: gazin_api
+    depends_on:
+      - gazin_db
+    networks:
+      - mysql-compose-network
+
+      
+networks:
+
+  mysql-compose-network: 
+    driver: bridge     
