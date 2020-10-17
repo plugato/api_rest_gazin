@@ -7,13 +7,15 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.util.Date;
-
+import lombok.experimental.SuperBuilder;
 //@AllArgsConstructor
 @NoArgsConstructor
 @Table
 @Data
 @Entity
 @Getter
+@SuperBuilder
+
 public class Developer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -1,10 +1,15 @@
 package com.plugato.api_rest_gazin;
 
-import lombok.Getter;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.util.Date;
 
 @Getter
+@Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class DeveloperDTO {
 
     private String nome;

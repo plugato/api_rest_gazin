@@ -4,10 +4,12 @@ package com.plugato.api_rest_gazin;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@AllArgsConstructor
+@NoArgsConstructor
 @Getter
 public class DeveloperResponseDTO{
 
@@ -17,7 +19,6 @@ public class DeveloperResponseDTO{
     private int idade;
     private String hobby;
     private Date datanascimento;
-    //teste nao retornar data nascimento
 
     public static DeveloperResponseDTO transformToDTO( Developer developer) {
         return new DeveloperResponseDTO(developer.getId(), developer.getNome(), developer.getSexo(), developer.getIdade(), developer.getHobby(), developer.getDatanascimento() );
