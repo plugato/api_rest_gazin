@@ -1,10 +1,7 @@
 package com.plugato.api_rest_gazin;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -79,8 +76,7 @@ public class DeveloperController {
                 "nome");
 
         if(allParams.isEmpty() ) {
-            developerList = findAll( page, size );
-            //developerRepository.findAll();
+            developerList = developerRepository.findAll( pageRequest );
         } else {
             String where = new String();
             Developer developerFilter = new Developer();
@@ -118,23 +114,9 @@ public class DeveloperController {
                         developerFilter.getIdade(),
                         developerFilter.getHobby(),
                         developerFilter.getDatanascimento(), pageRequest );
-//
-//                developerList = new PageImpl<>(
-//                        developerRepository.queryWhere( developerFilter.getId(),
-//                                                                developerFilter.getNome(),
-//                                                                developerFilter.getSexo(),
-//                                                                developerFilter.getIdade(),
-//                                                                developerFilter.getHobby(),
-//                                                                developerFilter.getDatanascimento(), pageRequest )
-//                        , pageRequest, size );
 
             }else
-                developerList = findAll( page, size );
-
-
-//            Developer getClosestOffer(allParams);
-            //List<Developer> developerList = developerRepository;
-            //List<DeveloperResponseDTO> developerResponseList = new ArrayList<>();
+                developerList =  developerRepository.findAll( pageRequest );//findAll( pageRequest, size );
 
         }
 
@@ -145,15 +127,10 @@ public class DeveloperController {
         return ResponseEntity.ok().body( new PageImpl<>(developerResponseList, pageRequest, size) );
 
     }
-    public Page<Developer> findAll( int page, int size ) {
+    public PageImpl<Developer> findAll(PageRequest pageRequest, int size ) {
 
-        PageRequest pageRequest = PageRequest.of(
-                page,
-                size,
-                Sort.Direction.ASC,
-                "nome");
-        return new PageImpl<>(
-                developerRepository.findAll(),
+        return new PageImpl<Developer>(
+                (List<Developer>) developerRepository.findAll( pageRequest ),
                 pageRequest, size);
     }
 
@@ -169,40 +146,6 @@ public class DeveloperController {
 
 
     }
-
-//    @GetMapping()
-//    @ResponseBody
-//    public String updateFoos(@RequestParam Map<String,String> allParams) {
-//
-//       return "Parameters are " + allParams.entrySet();
-//
-//
-//    }
-
-//    @RequestMapping("/findByQuery")
-//    public List<DeveloperResponseDTO> findByQuery(@RequestParam("descricao") String descricao) {
-//
-//
-//
-//        //return service.findByDescricaoContaining(descricao);
-//
-//    }
-
-//    @RequestMapping("/findByQuery")
-//    //@Modifying
-//    @Query("select * from #{#entityName} t where t.attribute = ?1")
-//    public List<DeveloperResponseDTO> findByQuery(@RequestParam("descricao") String descricao) {
-//        //return service.findByDescricaoContaining(descricao);
-//
-//        //List<DeveloperResponseDTO> findAllByAttribute(descricao);
-//
-//        //List<DeveloperDTO> findByFirstnameEndsWith(String descricao);
-//
-//        //List<Log> findByTestNo(String testNo);
-//    }
-//    @RequestMapping(value="/{value}/{id}", method=RequestMethod.GET)
-//
-//    }
 
     @PutMapping("/{id}")
     public ResponseEntity<DeveloperResponseDTO> modeifyDeveloper(@PathVariable Long id, @RequestBody DeveloperDTO developerDTO ){
