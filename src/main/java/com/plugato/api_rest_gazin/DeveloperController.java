@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
-import java.sql.Date;
 import java.text.ParseException;
 import java.util.*;
 
@@ -18,6 +17,7 @@ public class DeveloperController {
 
     @Autowired(required=true)
     DeveloperRepository developerRepository;
+    DeveloperService service = new DeveloperService();
 
     @PostMapping(consumes="application/json")
     public ResponseEntity<DeveloperResponseDTO> AddDeveloper(@RequestBody DeveloperDTO developerDTO ){
@@ -42,18 +42,6 @@ public class DeveloperController {
         return ResponseEntity.noContent().build();
 
     }
-//    @GetMapping
-//    public ResponseEntity<List<DeveloperResponseDTO>> ListDeveloper(@RequestParam Map<String,String> allParams ){
-//        List<Developer> developerList = developerRepository.findAll();
-//        List<DeveloperResponseDTO> developerResponseList = new ArrayList<>();
-//
-//        for( Developer list : developerList ){
-//            developerResponseList.add( DeveloperResponseDTO.transformToDTO( list ) );
-//        }
-//        return ResponseEntity.ok().body( developerResponseList );
-//
-//    }
-//Logger logger = LoggerFactory.getLogger(ApiRestGazinApplication.class);
 
     @GetMapping
     public ResponseEntity<Page<DeveloperResponseDTO>> ListDeveloper(@RequestParam Map<String,String> allParams,
@@ -64,74 +52,29 @@ public class DeveloperController {
                                                                     @RequestParam(
                                                                             value = "size",
                                                                             required = false,
-                                                                            defaultValue = "2") int size ) throws ParseException {
-        List<DeveloperResponseDTO> developerResponseList = new ArrayList<>();
+                                                                            defaultValue = "10") int size ){
         Page<Developer> developerList ;
-
-
         PageRequest pageRequest = PageRequest.of(
                 page,
                 size,
                 Sort.Direction.ASC,
                 "nome");
 
-        if(allParams.isEmpty() ) {
-            developerList = developerRepository.findAll( pageRequest );
-        } else {
-            String where = new String();
-            Developer developerFilter = new Developer();
-            for (Map.Entry<String, String> entry : allParams.entrySet())
-            {
+        Developer developerFilter = new Developer();
 
-                if( entry.getKey().equals( "id" ) ) {
-                    developerFilter.setId( Long.parseLong(entry.getValue() ) );
-                }
-                if( entry.getKey().equals( "nome" )) {
-                    developerFilter.setNome( entry.getValue() );
-                }
-                if( entry.getKey().equals( "sexo" )) {
-                    developerFilter.setSexo( entry.getValue() );
-                }
-                if( entry.getKey().equals( "idade" )) {
-                    developerFilter.setIdade( Integer.parseInt( entry.getValue() ) );
-                }
-                if( entry.getKey().equals( "hobby" )) {
-                    developerFilter.setHobby( entry.getValue() );
-                }
-                if( entry.getKey().equals( "datanascimento" )) {
-                    //estava invertendo dpois que troquei para date sql
-//                    String dataString = entry.getValue();
-//                    SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-                    developerFilter.setDatanascimento( Date.valueOf( entry.getValue() ) );
-                }
-
-            }
-            if( !developerFilter.equals( new Developer() ) ){
-
-                developerList = developerRepository.queryWhere( developerFilter.getId(),
-                        developerFilter.getNome(),
-                        developerFilter.getSexo(),
-                        developerFilter.getIdade(),
-                        developerFilter.getHobby(),
-                        developerFilter.getDatanascimento(), pageRequest );
-
-            }else
-                developerList =  developerRepository.findAll( pageRequest );//findAll( pageRequest, size );
-
+        if( service.fillFilter( developerFilter, allParams ) ){
+            developerList = developerRepository.queryWhere( developerFilter.getId(),
+                    developerFilter.getNome(),
+                    developerFilter.getSexo(),
+                    developerFilter.getIdade(),
+                    developerFilter.getHobby(),
+                    developerFilter.getDatanascimento(), pageRequest );
+        }else {
+            developerList = developerRepository.findAll(pageRequest);
         }
 
-        for (Developer list : developerList) {
-            developerResponseList.add(DeveloperResponseDTO.transformToDTO(list));
-        }
+        return ResponseEntity.ok().body( new PageImpl<>( service.makeResponseList( developerList ), pageRequest, size) );
 
-        return ResponseEntity.ok().body( new PageImpl<>(developerResponseList, pageRequest, size) );
-
-    }
-    public PageImpl<Developer> findAll(PageRequest pageRequest, int size ) {
-
-        return new PageImpl<Developer>(
-                (List<Developer>) developerRepository.findAll( pageRequest ),
-                pageRequest, size);
     }
 
     @GetMapping("/{id}")
@@ -144,19 +87,16 @@ public class DeveloperController {
 
         return ResponseEntity.notFound().build();
 
-
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<DeveloperResponseDTO> modeifyDeveloper(@PathVariable Long id, @RequestBody DeveloperDTO developerDTO ){
 
         Optional<Developer> developer = developerRepository.findById( id );
-
-        if ( developer.isPresent() ){
-            Developer devel = developerDTO.transformToObject();
-            devel.setId(id);
-            developerRepository.save( devel );
-            return ResponseEntity.ok().body( DeveloperResponseDTO.transformToDTO( devel ) );
+        Developer developer1 = service.makeUpdateDeveloper( developer, developerDTO, id );
+        if(  developer1.getId() != 0  ){
+            developerRepository.save( developer1 );
+            return ResponseEntity.ok().body( DeveloperResponseDTO.transformToDTO( developer1 ) );
         }
 
         return ResponseEntity.badRequest().build();
