@@ -1,7 +1,6 @@
 package com.plugato.api_rest_gazin;
 
 import lombok.*;
-
 import java.sql.Date;
 
 @Getter
@@ -9,7 +8,7 @@ import java.sql.Date;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class DeveloperDTO {
+public class DeveloperRequestDTO {
 
     private String nome;
     private String sexo;
@@ -18,7 +17,6 @@ public class DeveloperDTO {
     private Date datanascimento;
 
     public Developer transformToObject(){
-        //return new Developer( nome, sexo, idade, hobby, datanascimento );
         return new Developer( nome, sexo, idade, hobby, datanascimento );
     }
 }

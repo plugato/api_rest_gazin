@@ -1,10 +1,8 @@
 package com.plugato.api_rest_gazin;
-
-
+ 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
 import java.sql.Date;
 
 @AllArgsConstructor

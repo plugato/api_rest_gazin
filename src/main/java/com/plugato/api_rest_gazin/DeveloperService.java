@@ -2,6 +2,7 @@ package com.plugato.api_rest_gazin;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -19,8 +20,8 @@ public class DeveloperService {
     @Autowired(required=true)
     DeveloperRepository developerRepository;
 
-    public DeveloperResponseDTO save( DeveloperDTO developerDTO ){
-        Developer developer = developerRepository.save( developerDTO.transformToObject() );
+    public DeveloperResponseDTO save( DeveloperRequestDTO developerRequestDTO){
+        Developer developer = developerRepository.save( developerRequestDTO.transformToObject() );
 
         return DeveloperResponseDTO.transformToDTO(developer);
     }
@@ -56,17 +57,16 @@ public class DeveloperService {
         return developerList;
     }
 
-    public DeveloperResponseDTO findById( Long id ){
+    public DeveloperResponseDTO getById( Long id ){
         Optional<Developer> developerFind = developerRepository.findById( id ) ;
-
         return DeveloperResponseDTO.transformToDTO( developerFind.get() );
 
     }
 
-    public DeveloperResponseDTO modeifyDeveloper( Long id, DeveloperDTO developerDTO ){
+    public DeveloperResponseDTO modeifyDeveloper( Long id, DeveloperRequestDTO developerRequestDTO){
         Optional<Developer> developer = developerRepository.findById( id );
 
-        Developer developer1 = makeUpdateDeveloper( developer, developerDTO, id );
+        Developer developer1 = makeUpdateDeveloper( developer, developerRequestDTO, id );
         if(  developer1.getId() != 0  ){
             Developer developer2 = developerRepository.save( developer1 );
             return DeveloperResponseDTO.transformToDTO( developer2 );
@@ -75,12 +75,8 @@ public class DeveloperService {
         return DeveloperResponseDTO.transformToDTO( new Developer() );
     }
 
-
-
     public Boolean fillFilter(Developer developerFilter, Map<String,String> allParams){
 
-        String where = new String();
-        //Developer developerFilter = new Developer();
         for (Map.Entry<String, String> entry : allParams.entrySet())
         {
 
@@ -100,9 +96,9 @@ public class DeveloperService {
                 developerFilter.setHobby( entry.getValue() );
             }
             if( entry.getKey().equals( "datanascimento" )) {
-                //estava invertendo dpois que troquei para date sql
-//                    String dataString = entry.getValue();
-//                    SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+                //TODO:estava invertendo depois que troquei para date sql
+                //                    String dataString = entry.getValue();
+                //                    SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
                 developerFilter.setDatanascimento( Date.valueOf( entry.getValue() ) );
             }
 
@@ -110,10 +106,17 @@ public class DeveloperService {
         Developer teste = new Developer();
         return ! developerFilter.equals( teste );
     }
+
+    public PageImpl PageableMakeResponseList( Map<String,String> allParams, PageRequest pageRequest, int size ){
+
+        return new PageImpl<>(
+                makeResponseList( listDeveloper( allParams, pageRequest ) ),
+                pageRequest,
+                size);
+    }
     public List<DeveloperResponseDTO> makeResponseList(Page<Developer> developerList){
 
         List<DeveloperResponseDTO> developerResponseList = new ArrayList<>();
-
         for (Developer list : developerList ) {
             developerResponseList.add(DeveloperResponseDTO.transformToDTO(list));
         }
@@ -121,11 +124,11 @@ public class DeveloperService {
         return developerResponseList;
     }
 
-    public Developer makeUpdateDeveloper(Optional<Developer> developer, DeveloperDTO developerDTO, Long id ){
-        Developer devel = null; //new Developer();
+    public Developer makeUpdateDeveloper(Optional<Developer> developer, DeveloperRequestDTO developerRequestDTO, Long id ){
 
+        Developer devel = null;
         if ( developer.isPresent() ) {
-            devel = developerDTO.transformToObject();
+            devel = developerRequestDTO.transformToObject();
             devel.setId(id);
 
         }

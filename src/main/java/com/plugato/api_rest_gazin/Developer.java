@@ -11,14 +11,12 @@ import lombok.experimental.SuperBuilder;
 
 import java.sql.Date;
 
-//@AllArgsConstructor
 @NoArgsConstructor
 @Table
 @Data
 @Entity
 @Getter
 @SuperBuilder
-
 public class Developer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
