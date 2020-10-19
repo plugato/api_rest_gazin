@@ -1,14 +1,82 @@
 package com.plugato.api_rest_gazin;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+@Service
 public class DeveloperService {
+
+    @Autowired(required=true)
+    DeveloperRepository developerRepository;
+
+    public DeveloperResponseDTO save( DeveloperDTO developerDTO ){
+        Developer developer = developerRepository.save( developerDTO.transformToObject() );
+
+        return DeveloperResponseDTO.transformToDTO(developer);
+    }
+
+    public URI createURI( DeveloperResponseDTO developerResponseDTO ){
+
+        return ServletUriComponentsBuilder.fromCurrentRequest().replacePath("/developers").path("/{id}")
+                .buildAndExpand( developerResponseDTO.getId() ).toUri();
+    }
+
+    public DeveloperResponseDTO delete(Long id ){
+        Optional<Developer> developerDelete = developerRepository.findById( id );
+
+        DeveloperResponseDTO developerResponseDTO = DeveloperResponseDTO.transformToDTO( developerDelete.get() );
+        return developerResponseDTO;
+    }
+
+    public Page<Developer> listDeveloper(Map<String,String> allParams, PageRequest pageRequest ) {
+        Developer developerFilter = new Developer();
+        Page<Developer> developerList ;
+
+        if ( fillFilter(developerFilter, allParams)) {
+            developerList = developerRepository.queryWhere(developerFilter.getId(),
+                    developerFilter.getNome(),
+                    developerFilter.getSexo(),
+                    developerFilter.getIdade(),
+                    developerFilter.getHobby(),
+                    developerFilter.getDatanascimento(), pageRequest);
+        } else {
+            developerList = developerRepository.findAll(pageRequest);
+        }
+
+        return developerList;
+    }
+
+    public DeveloperResponseDTO findById( Long id ){
+        Optional<Developer> developerFind = developerRepository.findById( id ) ;
+
+        return DeveloperResponseDTO.transformToDTO( developerFind.get() );
+
+    }
+
+    public DeveloperResponseDTO modeifyDeveloper( Long id, DeveloperDTO developerDTO ){
+        Optional<Developer> developer = developerRepository.findById( id );
+
+        Developer developer1 = makeUpdateDeveloper( developer, developerDTO, id );
+        if(  developer1.getId() != 0  ){
+            Developer developer2 = developerRepository.save( developer1 );
+            return DeveloperResponseDTO.transformToDTO( developer2 );
+        }
+
+        return DeveloperResponseDTO.transformToDTO( new Developer() );
+    }
+
+
+
     public Boolean fillFilter(Developer developerFilter, Map<String,String> allParams){
 
         String where = new String();
@@ -43,6 +111,7 @@ public class DeveloperService {
         return ! developerFilter.equals( teste );
     }
     public List<DeveloperResponseDTO> makeResponseList(Page<Developer> developerList){
+
         List<DeveloperResponseDTO> developerResponseList = new ArrayList<>();
 
         for (Developer list : developerList ) {

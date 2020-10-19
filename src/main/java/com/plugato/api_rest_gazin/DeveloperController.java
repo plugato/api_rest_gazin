@@ -16,29 +16,21 @@ import java.util.*;
 public class DeveloperController {
 
     @Autowired(required=true)
-    DeveloperRepository developerRepository;
     DeveloperService service = new DeveloperService();
+    //DeveloperRepository developerRepository;
 
     @PostMapping(consumes="application/json")
     public ResponseEntity<DeveloperResponseDTO> AddDeveloper(@RequestBody DeveloperDTO developerDTO ){
 
-        Developer developer  = developerRepository.save( developerDTO.transformToObject() );
-
-        URI uri = ServletUriComponentsBuilder.fromCurrentRequest().replacePath("/developers").path("/{id}")
-                .buildAndExpand( developer.getId() ).toUri();
-
-        return ResponseEntity.created(uri).body( DeveloperResponseDTO.transformToDTO(developer) );
+        DeveloperResponseDTO developerResponseDTO = service.save( developerDTO );
+        return ResponseEntity.created( service.createURI( developerResponseDTO ) ).body( developerResponseDTO );
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<DeveloperResponseDTO> DeleteDeveloper( @PathVariable Long id ){
-        Optional<Developer> developerDelete = developerRepository.findById( id );
-
-        if (developerDelete.isPresent() ){
-           developerRepository.delete( developerDelete.get() );
-           return ResponseEntity.ok().body( DeveloperResponseDTO.transformToDTO( developerDelete.get() ) );
-
-        }
+        DeveloperResponseDTO developerDelete = service.delete( id );
+        if( developerDelete.getId() != 0 )
+            return ResponseEntity.ok().body( developerDelete );
         return ResponseEntity.noContent().build();
 
     }
@@ -53,37 +45,29 @@ public class DeveloperController {
                                                                             value = "size",
                                                                             required = false,
                                                                             defaultValue = "10") int size ){
-        Page<Developer> developerList ;
+
         PageRequest pageRequest = PageRequest.of(
                 page,
                 size,
                 Sort.Direction.ASC,
                 "nome");
 
-        Developer developerFilter = new Developer();
+        PageImpl pagaImpl = new PageImpl<>(
+                service.makeResponseList( service.listDeveloper( allParams, pageRequest ) ),
+                pageRequest,
+                size);
 
-        if( service.fillFilter( developerFilter, allParams ) ){
-            developerList = developerRepository.queryWhere( developerFilter.getId(),
-                    developerFilter.getNome(),
-                    developerFilter.getSexo(),
-                    developerFilter.getIdade(),
-                    developerFilter.getHobby(),
-                    developerFilter.getDatanascimento(), pageRequest );
-        }else {
-            developerList = developerRepository.findAll(pageRequest);
-        }
-
-        return ResponseEntity.ok().body( new PageImpl<>( service.makeResponseList( developerList ), pageRequest, size) );
+        return ResponseEntity.ok().body( pagaImpl );
 
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<DeveloperResponseDTO> findById(@PathVariable Long id ){
 
-        Optional<Developer> developerFind = developerRepository.findById( id ) ;
+        DeveloperResponseDTO developerResponseDTO = service.findById( id );
 
-        if ( developerFind.isPresent() )
-            return ResponseEntity.ok().body(  DeveloperResponseDTO.transformToDTO( developerFind.get() )  );
+        if ( developerResponseDTO.getId() != 0 )
+            return ResponseEntity.ok().body( developerResponseDTO );
 
         return ResponseEntity.notFound().build();
 
@@ -92,13 +76,10 @@ public class DeveloperController {
     @PutMapping("/{id}")
     public ResponseEntity<DeveloperResponseDTO> modeifyDeveloper(@PathVariable Long id, @RequestBody DeveloperDTO developerDTO ){
 
-        Optional<Developer> developer = developerRepository.findById( id );
-        Developer developer1 = service.makeUpdateDeveloper( developer, developerDTO, id );
-        if(  developer1.getId() != 0  ){
-            developerRepository.save( developer1 );
-            return ResponseEntity.ok().body( DeveloperResponseDTO.transformToDTO( developer1 ) );
+        DeveloperResponseDTO developerResponseDTO = service.modeifyDeveloper( id, developerDTO );
+        if(  developerResponseDTO.getId() != 0  ){
+            return ResponseEntity.ok().body( developerResponseDTO );
         }
-
         return ResponseEntity.badRequest().build();
     }
 
