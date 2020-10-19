@@ -1,12 +1,11 @@
 package com.plugato.api_rest_gazin;
 
 
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
+import java.sql.Date;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -15,7 +14,7 @@ public class DeveloperResponseDTO{
 
     private long id;
     private String nome;
-    private char sexo;
+    private String sexo;
     private int idade;
     private String hobby;
     private Date datanascimento;
@@ -24,8 +23,5 @@ public class DeveloperResponseDTO{
         return new DeveloperResponseDTO(developer.getId(), developer.getNome(), developer.getSexo(), developer.getIdade(), developer.getHobby(), developer.getDatanascimento() );
 
     }
-//    public static DeveloperResponseDTO transformToDTO(Developer developer) {///somente teste se esta transformando o dto certo
-//        //return new DeveloperResponseDTO(developer.getId(), developer.getNome(), developer.getSexo(), developer.getIdade(), developer.getHobby(), developer.getDatanascimento() );
-//        return new DeveloperResponseDTO(developer.getId(), developer.getNome(), developer.getSexo(), developer.getIdade(), developer.getHobby() );
-//    }
+
 }

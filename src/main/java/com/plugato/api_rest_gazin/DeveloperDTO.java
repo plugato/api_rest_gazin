@@ -1,9 +1,8 @@
 package com.plugato.api_rest_gazin;
 
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 
-import java.util.Date;
+import java.sql.Date;
 
 @Getter
 @Setter
@@ -13,7 +12,7 @@ import java.util.Date;
 public class DeveloperDTO {
 
     private String nome;
-    private char sexo;
+    private String sexo;
     private int idade;
     private String hobby;
     private Date datanascimento;

@@ -1,14 +1,19 @@
 package com.plugato.api_rest_gazin;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.sql.Date;
+import java.text.ParseException;
+import java.util.*;
+
 
 @RestController
 @RequestMapping("/developers")
@@ -40,15 +45,116 @@ public class DeveloperController {
         return ResponseEntity.noContent().build();
 
     }
-    @GetMapping
-    public ResponseEntity<List<DeveloperResponseDTO>> ListDeveloper(){
-        List<Developer> developerList = developerRepository.findAll();
-        List<DeveloperResponseDTO> developerResponseList = new ArrayList<>();
+//    @GetMapping
+//    public ResponseEntity<List<DeveloperResponseDTO>> ListDeveloper(@RequestParam Map<String,String> allParams ){
+//        List<Developer> developerList = developerRepository.findAll();
+//        List<DeveloperResponseDTO> developerResponseList = new ArrayList<>();
+//
+//        for( Developer list : developerList ){
+//            developerResponseList.add( DeveloperResponseDTO.transformToDTO( list ) );
+//        }
+//        return ResponseEntity.ok().body( developerResponseList );
+//
+//    }
+//Logger logger = LoggerFactory.getLogger(ApiRestGazinApplication.class);
 
-        for( Developer list : developerList ){
-            developerResponseList.add( DeveloperResponseDTO.transformToDTO( list ) );
+    @GetMapping
+    public ResponseEntity<Page<DeveloperResponseDTO>> ListDeveloper(@RequestParam Map<String,String> allParams,
+                                                                    @RequestParam(
+                                                                            value = "page",
+                                                                            required = false,
+                                                                            defaultValue = "0") int page,
+                                                                    @RequestParam(
+                                                                            value = "size",
+                                                                            required = false,
+                                                                            defaultValue = "2") int size ) throws ParseException {
+        List<DeveloperResponseDTO> developerResponseList = new ArrayList<>();
+        Page<Developer> developerList ;
+
+
+        PageRequest pageRequest = PageRequest.of(
+                page,
+                size,
+                Sort.Direction.ASC,
+                "nome");
+
+        if(allParams.isEmpty() ) {
+            developerList = findAll( page, size );
+            //developerRepository.findAll();
+        } else {
+            String where = new String();
+            Developer developerFilter = new Developer();
+            for (Map.Entry<String, String> entry : allParams.entrySet())
+            {
+
+                if( entry.getKey().equals( "id" ) ) {
+                    developerFilter.setId( Long.parseLong(entry.getValue() ) );
+                }
+                if( entry.getKey().equals( "nome" )) {
+                    developerFilter.setNome( entry.getValue() );
+                }
+                if( entry.getKey().equals( "sexo" )) {
+                    developerFilter.setSexo( entry.getValue() );
+                }
+                if( entry.getKey().equals( "idade" )) {
+                    developerFilter.setIdade( Integer.parseInt( entry.getValue() ) );
+                }
+                if( entry.getKey().equals( "hobby" )) {
+                    developerFilter.setHobby( entry.getValue() );
+                }
+                if( entry.getKey().equals( "datanascimento" )) {
+                    //estava invertendo dpois que troquei para date sql
+//                    String dataString = entry.getValue();
+//                    SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+                    developerFilter.setDatanascimento( Date.valueOf( entry.getValue() ) );
+                }
+
+            }
+            if( !developerFilter.equals( new Developer() ) ){
+
+                developerList = developerRepository.queryWhere( developerFilter.getId(),
+                        developerFilter.getNome(),
+                        developerFilter.getSexo(),
+                        developerFilter.getIdade(),
+                        developerFilter.getHobby(),
+                        developerFilter.getDatanascimento(), pageRequest );
+//
+//                developerList = new PageImpl<>(
+//                        developerRepository.queryWhere( developerFilter.getId(),
+//                                                                developerFilter.getNome(),
+//                                                                developerFilter.getSexo(),
+//                                                                developerFilter.getIdade(),
+//                                                                developerFilter.getHobby(),
+//                                                                developerFilter.getDatanascimento(), pageRequest )
+//                        , pageRequest, size );
+
+            }else
+                developerList = findAll( page, size );
+
+
+//            Developer getClosestOffer(allParams);
+            //List<Developer> developerList = developerRepository;
+            //List<DeveloperResponseDTO> developerResponseList = new ArrayList<>();
+
         }
-        return ResponseEntity.ok().body( developerResponseList );
+
+        for (Developer list : developerList) {
+            developerResponseList.add(DeveloperResponseDTO.transformToDTO(list));
+        }
+
+        return ResponseEntity.ok().body( new PageImpl<>(developerResponseList, pageRequest, size) );
+
+    }
+    public Page<Developer> findAll( int page, int size ) {
+
+        PageRequest pageRequest = PageRequest.of(
+                page,
+                size,
+                Sort.Direction.ASC,
+                "nome");
+        return new PageImpl<>(
+                developerRepository.findAll(),
+                pageRequest, size);
     }
 
     @GetMapping("/{id}")
@@ -63,6 +169,40 @@ public class DeveloperController {
 
 
     }
+
+//    @GetMapping()
+//    @ResponseBody
+//    public String updateFoos(@RequestParam Map<String,String> allParams) {
+//
+//       return "Parameters are " + allParams.entrySet();
+//
+//
+//    }
+
+//    @RequestMapping("/findByQuery")
+//    public List<DeveloperResponseDTO> findByQuery(@RequestParam("descricao") String descricao) {
+//
+//
+//
+//        //return service.findByDescricaoContaining(descricao);
+//
+//    }
+
+//    @RequestMapping("/findByQuery")
+//    //@Modifying
+//    @Query("select * from #{#entityName} t where t.attribute = ?1")
+//    public List<DeveloperResponseDTO> findByQuery(@RequestParam("descricao") String descricao) {
+//        //return service.findByDescricaoContaining(descricao);
+//
+//        //List<DeveloperResponseDTO> findAllByAttribute(descricao);
+//
+//        //List<DeveloperDTO> findByFirstnameEndsWith(String descricao);
+//
+//        //List<Log> findByTestNo(String testNo);
+//    }
+//    @RequestMapping(value="/{value}/{id}", method=RequestMethod.GET)
+//
+//    }
 
     @PutMapping("/{id}")
     public ResponseEntity<DeveloperResponseDTO> modeifyDeveloper(@PathVariable Long id, @RequestBody DeveloperDTO developerDTO ){
