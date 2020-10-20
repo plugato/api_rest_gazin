@@ -1,4 +1,4 @@
-# Cricao de uma API utilizando java utilizando framework Spring utilizando banco mysql
+# Criacao de uma API utilizando java utilizando framework Spring utilizando banco mysql
 api e banco estao armazenados no docker para rodar a aplicacao basta subir o docker compose
 docker-compose
 o commando abaixo ira executar o docker-compose.yml e subira os docker's oqual ja ira se encarregar
