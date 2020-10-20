@@ -19,7 +19,7 @@ public class DeveloperRequestDTO {
     private String hobby;
     private Date datanascimento;
 
-    public Developer transformToObject(){
-        return new Developer( nome, sexo, idade, hobby, datanascimento );
+    public Developer transformToObject() {
+        return new Developer(nome, sexo, idade, hobby, datanascimento);
     }
 }

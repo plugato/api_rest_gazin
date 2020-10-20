@@ -3,12 +3,9 @@ package com.plugato.api_rest_gazin;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import javax.persistence.*;
-//import java.util.Date;
-
 import lombok.experimental.SuperBuilder;
 
+import javax.persistence.*;
 import java.sql.Date;
 
 @NoArgsConstructor
@@ -27,7 +24,7 @@ public class Developer {
     private String hobby;
     private Date datanascimento;
 
-    public Developer(String nome, String sexo, int idade, String hobby, Date datanascimento ) {
+    public Developer(String nome, String sexo, int idade, String hobby, Date datanascimento) {
         this.nome = nome;
         this.sexo = sexo;
         this.idade = idade;

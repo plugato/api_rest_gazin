@@ -6,10 +6,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class ApiRestGazinApplication {
 
-	public static void main(String[] args) {
+    public static void main(String[] args) {
 
-		SpringApplication.run(ApiRestGazinApplication.class, args);
+        SpringApplication.run(ApiRestGazinApplication.class, args);
 
-	}
+    }
 
 }
