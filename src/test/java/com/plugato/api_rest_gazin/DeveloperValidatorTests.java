@@ -28,15 +28,10 @@ public class DeveloperValidatorTests {
     public void contextLoads() {
     }
 
-
-
     @Test
-    public void listDeveloper() {
+    public void getAllPageableAndFilter() {
 
-
-
-        Developer developerFilter = FakeDeveloper();
-        Pageable pageable;
+        Developer developerFilter = new DeveloperRequestDTO().transformToObject();
 
         PageRequest pageRequest = PageRequest.of(
                 0,
@@ -44,45 +39,81 @@ public class DeveloperValidatorTests {
                 Sort.Direction.ASC,
                 "nome");
 
-        List<Developer> developerList =  Arrays.asList( FakeDeveloper(),
-                                                        FakeDeveloper(),
-                                                        FakeDeveloper(),
-                                                        FakeDeveloper(),
-                                                        FakeDeveloper() );
+        List<Developer> developerList =  Arrays.asList( MockDeveloper(),
+                                                        MockDeveloper(),
+                                                        MockDeveloper(),
+                                                        MockDeveloper(),
+                                                        MockDeveloper() );
 
-        Page<Developer> pages = new PageImpl<Developer>(developerList, pageRequest, developerList.size());
+        Page<Developer> pages = new PageImpl<Developer>( developerList, pageRequest, developerList.size());
+
+        Map<String,String> allParams = new HashMap<String,String>();
+        allParams.put( "sexo", new String( "f" ) );
+        developerFilter.setSexo("f");
 
         when(developerRepository.queryWhere( developerFilter.getId(), developerFilter.getNome(), developerFilter.getSexo(),
                 developerFilter.getIdade(), developerFilter.getHobby(), developerFilter.getDatanascimento(), pageRequest ) )
                 .thenReturn( pages );
 
-        when(developerRepository.findAll(pageRequest) ).thenReturn( pages );;
+        when(developerRepository.findAll() ).thenReturn( developerList );;
 
-        Map<String,String> allParams = new HashMap<String,String>();
-        //allParams.put( "sexo", new String( "m" ));
+        Page<Developer> pageImpl = (Page<Developer>) developerService.ControllParameterPageable( allParams );
 
-        PageImpl pageImpl = developerService.PageableMakeResponseList( allParams, pageRequest, 10 );
-        assertEquals( pageImpl.getNumberOfElements(), developerList.size() );
+        assertEquals( pageImpl.getContent().size(), developerList.size() );
+
     }
 
+    @Test
+    public void getAllNotPageable() {
+
+        Developer developerFilter = new DeveloperRequestDTO().transformToObject();
+
+        PageRequest pageRequest = PageRequest.of(
+                0,
+                10,
+                Sort.Direction.ASC,
+                "nome");
+
+        List<Developer> developerList =  Arrays.asList( MockDeveloper(),
+                                                        MockDeveloper(),
+                                                        MockDeveloper(),
+                                                        MockDeveloper(),
+                                                        MockDeveloper() );
+
+        Page<Developer> pages = new PageImpl<Developer>( developerList, pageRequest, developerList.size());
+
+        Map<String,String> allParams = new HashMap<String,String>();
+
+        when(developerRepository.queryWhere( developerFilter.getId(), developerFilter.getNome(), developerFilter.getSexo(),
+                developerFilter.getIdade(), developerFilter.getHobby(), developerFilter.getDatanascimento(), pageRequest ) )
+                .thenReturn( pages );
+
+        when(developerRepository.findAll() ).thenReturn( developerList );;
+
+        List<Developer> pageImpl = (List<Developer>) developerService.ControllParameterPageable( allParams );
+
+        assertEquals( pageImpl.size(), developerList.size() );
+
+    }
 
     @Test
     public void saveTest() {
 
+        when(developerRepository.save( MockDeveloperRequestDTO().transformToObject() ) ).thenReturn(MockDeveloper());
 
-        when(developerRepository.save( FakeDeveloperRequestDTO().transformToObject() ) ).thenReturn(FakeDeveloper());
+        developerService.save( MockDeveloperRequestDTO() );
 
-        developerService.save( FakeDeveloperRequestDTO() );
-        assertEquals(FakeDeveloperRequestDTO().getNome(), FakeDeveloper().getNome() );
+        assertEquals(MockDeveloperRequestDTO().getNome(), MockDeveloper().getNome() );
+
     }
-
 
     @Test
     public void getByIdTest() throws Exception
     {
         Long id = 55L;
 
-        when(developerRepository.findById(id)).thenReturn(java.util.Optional.ofNullable(FakeDeveloper()));
+        when(developerRepository.findById(id)).thenReturn(java.util.Optional.ofNullable(MockDeveloper()));
+
         DeveloperResponseDTO seek = developerService.getById( id );
 
         Assert.assertSame(  seek.getId(), id );
@@ -94,10 +125,12 @@ public class DeveloperValidatorTests {
 
         Long id = 55L;
 
-        when( developerRepository.save( FakeDeveloper() ) ).thenReturn( FakeDeveloper() );
-        DeveloperResponseDTO developerResponseDTO = developerService.modeifyDeveloper( id, FakeDeveloperRequestDTO() );
+        when( developerRepository.save( MockDeveloper() ) ).thenReturn( MockDeveloper() );
 
-        Assert.assertSame( developerResponseDTO.getNome(), FakeDeveloper().getNome()  );
+        DeveloperResponseDTO developerResponseDTO = developerService.modeifyDeveloper( id, MockDeveloperRequestDTO() );
+
+        Assert.assertSame( developerResponseDTO.getNome(), MockDeveloper().getNome()  );
+
     }
 
     @Test
@@ -105,16 +138,18 @@ public class DeveloperValidatorTests {
     {
         Long id = 55L;
 
-        when( developerRepository.findById( id ) ).thenReturn(java.util.Optional.ofNullable(FakeDeveloper()));
+        when( developerRepository.findById( id ) ).thenReturn(java.util.Optional.ofNullable(MockDeveloper()));
+
         DeveloperResponseDTO developerResponseDTO = developerService.delete( id );
 
-        Assert.assertSame( developerResponseDTO.getId(), FakeDeveloper().getId() );
+        Assert.assertSame( developerResponseDTO.getId(), MockDeveloper().getId() );
+
    }
 
    @Test
    public void postTest() throws Exception {
 
-        Developer developer = FakeDeveloper();
+        Developer developer = MockDeveloper();
         developer.setNome("testePost");
         developer.setSexo("M");
         developer.setDatanascimento(Date.valueOf("1993-05-06"));
@@ -130,23 +165,23 @@ public class DeveloperValidatorTests {
     @Test
     public void postErroTest() throws Exception {
 
-        Developer developer = FakeDeveloper();
+        Developer developer = MockDeveloper();
         developer.setNome("erro");
 
         when( developerRepository.save( developer ) ).thenReturn( developer );
 
-        assertNotEquals( developer.getNome(), FakeDeveloper().getNome() );
+        assertNotEquals( developer.getNome(), MockDeveloper().getNome() );
 
     }
 
-    public DeveloperResponseDTO FakeDeveloperResponseDTO() {
-        Developer developer = FakeDeveloper();
+    public DeveloperResponseDTO MockDeveloperResponseDTO() {
+        Developer developer = MockDeveloper();
         Long id = 55L;
         developer.setId(id);
         DeveloperResponseDTO developerResponseDTO = DeveloperResponseDTO.transformToDTO(developer);
         return developerResponseDTO;
     }
-    public DeveloperRequestDTO FakeDeveloperRequestDTO(){
+    public DeveloperRequestDTO MockDeveloperRequestDTO(){
         DeveloperRequestDTO developerRequestDTO = new DeveloperRequestDTO();
         developerRequestDTO.setNome("manoel ricardo");
         developerRequestDTO.setHobby("beber");
@@ -155,8 +190,8 @@ public class DeveloperValidatorTests {
         developerRequestDTO.setDatanascimento(Date.valueOf("1993-06-05"));
         return developerRequestDTO;
     }
-    public Developer FakeDeveloper(){
-        Developer developer = FakeDeveloperRequestDTO().transformToObject();
+    public Developer MockDeveloper(){
+        Developer developer = MockDeveloperRequestDTO().transformToObject();
         developer.setId( 55L );
         return  developer;
 

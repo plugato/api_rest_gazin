@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.Map;
 
 @RestController
@@ -47,24 +48,10 @@ public class DeveloperController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<DeveloperResponseDTO>> listDeveloper(@RequestParam Map<String,String> allParams,
-                                                                    @RequestParam(
-                                                                            value = "page",
-                                                                            required = false,
-                                                                            defaultValue = "0") int page,
-                                                                    @RequestParam(
-                                                                            value = "size",
-                                                                            required = false,
-                                                                            defaultValue = "10") int size ){
-        PageRequest pageRequest = PageRequest.of(
-                page,
-                size,
-                Sort.Direction.ASC,
-                "nome");
+    public ResponseEntity<Iterable<Developer>> listDeveloper(@RequestParam Map<String,String> allParams ){
 
-        PageImpl pageImpl = service.PageableMakeResponseList( allParams, pageRequest, size );
+         return ResponseEntity.ok().body(  service.ControllParameterPageable( allParams ) );
 
-        return ResponseEntity.ok().body( pageImpl );
 
     }
 

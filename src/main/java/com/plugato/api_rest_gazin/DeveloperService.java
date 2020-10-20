@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -60,6 +61,10 @@ public class DeveloperService {
         return developerList;
     }
 
+    public Iterable<Developer> listAllDeveloper() {
+        return developerRepository.findAll();
+    }
+
     public DeveloperResponseDTO getById( Long id ){
         Optional<Developer> developerFind = developerRepository.findById( id ) ;
         return DeveloperResponseDTO.transformToDTO( developerFind.get() );
@@ -108,6 +113,40 @@ public class DeveloperService {
         }
         Developer teste = new Developer();
         return ! developerFilter.equals( teste );
+    }
+
+    public Iterable<Developer> ControllParameterPageable( Map<String,String>  allParams ){
+        int page = -1;
+        int size = -1;
+
+        for (Map.Entry<String, String> entry : allParams.entrySet()){
+            if( entry.getKey().equals( "page" ) ) {
+                page = Integer.parseInt(entry.getValue());
+            }
+            if( entry.getKey().equals( "size" ) ) {
+                size = Integer.parseInt(entry.getValue());
+            }
+        }
+
+        allParams.remove("page");
+        allParams.remove("size");
+
+        if( allParams.size() < 1 && size < 0 )
+            return listAllDeveloper();
+
+
+        if (size < 0) {
+            size = 10;
+            page = 0;
+        }
+
+        PageRequest pageRequest = PageRequest.of(
+                page,
+                size,
+                Sort.Direction.ASC,
+                "nome");
+
+        return PageableMakeResponseList( allParams, pageRequest, size );
     }
 
     public PageImpl PageableMakeResponseList( Map<String,String> allParams, PageRequest pageRequest, int size ){
