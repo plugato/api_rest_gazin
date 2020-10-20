@@ -25,4 +25,6 @@ public interface DeveloperRepository extends PagingAndSortingRepository<Develope
             , nativeQuery = true )
     Page<Developer> queryWhere(Long id, String nome, String sexo, int idade, String hobby, Date dataNascimento, Pageable pageable);
 
+
+
 }

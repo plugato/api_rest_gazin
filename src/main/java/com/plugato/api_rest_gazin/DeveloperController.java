@@ -20,10 +20,10 @@ public class DeveloperController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<DeveloperResponseDTO> deleteDeveloper( @PathVariable Long id ){
+    public ResponseEntity<DeveloperResponseDTO> deleteDeveloper( @PathVariable Long id ) throws Exception {
         DeveloperResponseDTO developerDelete = service.delete( id );
         if( developerDelete.getId() != 0 )
-            return ResponseEntity.ok().body( developerDelete );
+            return ResponseEntity.accepted().body( developerDelete );
         return ResponseEntity.noContent().build();
     }
 
@@ -38,7 +38,8 @@ public class DeveloperController {
 
     @PutMapping("/{id}")
     public ResponseEntity<DeveloperResponseDTO> putDeveloper(@PathVariable Long id, @RequestBody DeveloperRequestDTO developerRequestDTO){
-        DeveloperResponseDTO developerResponseDTO = service.modeifyDeveloper( id, developerRequestDTO);
+
+        DeveloperResponseDTO developerResponseDTO = service.modeifyDeveloper( id, developerRequestDTO );
         if(  developerResponseDTO.getId() != 0  )
             return ResponseEntity.ok().body( developerResponseDTO );
 

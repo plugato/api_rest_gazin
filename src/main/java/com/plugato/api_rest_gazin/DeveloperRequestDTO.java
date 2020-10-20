@@ -1,6 +1,8 @@
 package com.plugato.api_rest_gazin;
 
 import lombok.*;
+import org.springframework.stereotype.Component;
+
 import java.sql.Date;
 
 @Getter
@@ -8,6 +10,7 @@ import java.sql.Date;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Component
 public class DeveloperRequestDTO {
 
     private String nome;

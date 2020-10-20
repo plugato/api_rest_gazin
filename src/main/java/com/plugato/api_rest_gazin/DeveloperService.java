@@ -35,6 +35,9 @@ public class DeveloperService {
     public DeveloperResponseDTO delete(Long id ){
         Optional<Developer> developerDelete = developerRepository.findById( id );
 
+        if( developerDelete.isPresent() )
+            developerRepository.deleteById( id );
+
         DeveloperResponseDTO developerResponseDTO = DeveloperResponseDTO.transformToDTO( developerDelete.get() );
         return developerResponseDTO;
     }
@@ -64,15 +67,15 @@ public class DeveloperService {
     }
 
     public DeveloperResponseDTO modeifyDeveloper( Long id, DeveloperRequestDTO developerRequestDTO){
-        Optional<Developer> developer = developerRepository.findById( id );
 
-        Developer developer1 = makeUpdateDeveloper( developer, developerRequestDTO, id );
-        if(  developer1.getId() != 0  ){
-            Developer developer2 = developerRepository.save( developer1 );
-            return DeveloperResponseDTO.transformToDTO( developer2 );
-        }
+        //Optional<Developer> developerFind = developerRepository.findById( id ) ; //ta auto increment no banco entao nao vai cadastrar o especifico
+        Developer develperObj = developerRequestDTO.transformToObject();
 
-        return DeveloperResponseDTO.transformToDTO( new Developer() );
+        develperObj.setId(id);
+        Developer developer2 = developerRepository.save( develperObj );
+
+        return DeveloperResponseDTO.transformToDTO( developer2 );
+
     }
 
     public Boolean fillFilter(Developer developerFilter, Map<String,String> allParams){
@@ -124,17 +127,17 @@ public class DeveloperService {
         return developerResponseList;
     }
 
-    public Developer makeUpdateDeveloper(Optional<Developer> developer, DeveloperRequestDTO developerRequestDTO, Long id ){
-
-        Developer devel = null;
-        if ( developer.isPresent() ) {
-            devel = developerRequestDTO.transformToObject();
-            devel.setId(id);
-
-        }
-        return devel;
-
-    }
+//    public Developer makeUpdateDeveloper(Optional<Developer> developer, DeveloperRequestDTO developerRequestDTO, Long id ){
+//
+//        Developer devel = null;
+//        if ( developer.isPresent() ) {
+//            devel = developerRequestDTO.transformToObject();
+//            devel.setId(id);
+//
+//        }
+//        return devel;
+//
+//    }
 
 
 }
