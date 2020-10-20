@@ -73,13 +73,14 @@ public class DeveloperService {
 
     public DeveloperResponseDTO modeifyDeveloper( Long id, DeveloperRequestDTO developerRequestDTO){
 
-        //Optional<Developer> developerFind = developerRepository.findById( id ) ; //ta auto increment no banco entao nao vai cadastrar o especifico
         Developer develperObj = developerRequestDTO.transformToObject();
 
         develperObj.setId(id);
-        Developer developer2 = developerRepository.save( develperObj );
+        Optional<Developer> developerFind = developerRepository.findById( id ) ;
+        if( !developerFind.isPresent() )
+            return new DeveloperResponseDTO();
 
-        return DeveloperResponseDTO.transformToDTO( developer2 );
+        return DeveloperResponseDTO.transformToDTO( developerRepository.save( develperObj ) );
 
     }
 
@@ -165,18 +166,6 @@ public class DeveloperService {
 
         return developerResponseList;
     }
-
-//    public Developer makeUpdateDeveloper(Optional<Developer> developer, DeveloperRequestDTO developerRequestDTO, Long id ){
-//
-//        Developer devel = null;
-//        if ( developer.isPresent() ) {
-//            devel = developerRequestDTO.transformToObject();
-//            devel.setId(id);
-//
-//        }
-//        return devel;
-//
-//    }
 
 
 }

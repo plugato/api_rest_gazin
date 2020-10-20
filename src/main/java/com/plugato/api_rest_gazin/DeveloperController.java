@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("/developers")
@@ -22,19 +23,24 @@ public class DeveloperController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<DeveloperResponseDTO> deleteDeveloper( @PathVariable Long id ) throws Exception {
-        DeveloperResponseDTO developerDelete = service.delete( id );
-        if( developerDelete.getId() != 0 )
+        try {
+            DeveloperResponseDTO developerDelete = service.delete( id );
             return ResponseEntity.accepted().body( developerDelete );
-        return ResponseEntity.noContent().build();
+        } catch(NoSuchElementException e) {
+            return ResponseEntity.noContent().build();
+        }
+
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<DeveloperResponseDTO> getById(@PathVariable Long id ){
-        DeveloperResponseDTO developerResponseDTO = service.getById( id );
-        if ( developerResponseDTO.getId() != 0 )
+        try {
+            DeveloperResponseDTO developerResponseDTO = service.getById( id );
             return ResponseEntity.ok().body( developerResponseDTO );
+        } catch(NoSuchElementException e) {
+            return ResponseEntity.notFound().build();
+        }
 
-        return ResponseEntity.notFound().build();
     }
 
     @PutMapping("/{id}")
@@ -44,18 +50,12 @@ public class DeveloperController {
         if(  developerResponseDTO.getId() != 0  )
             return ResponseEntity.ok().body( developerResponseDTO );
 
-        return ResponseEntity.badRequest().build();
+        return ResponseEntity.notFound().build();
     }
 
     @GetMapping
     public ResponseEntity<Iterable<Developer>> listDeveloper(@RequestParam Map<String,String> allParams ){
-
          return ResponseEntity.ok().body(  service.ControllParameterPageable( allParams ) );
-
-
     }
-
-
-
 
 }
